@@ -1,228 +1,139 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Змейка</title>
-
   <style>
-
     body {
-
       display: flex;
-
       flex-direction: column;
-
       align-items: center;
-
       justify-content: center;
-
       height: 100vh;
-
       margin: 0;
-
       background: #000;
-
       color: white;
-
     }
-
     canvas { background: #111; display: block; margin-bottom: 20px; }
-
     .controls {
-
       display: grid;
-
       grid-template-columns: 1fr 1fr 1fr;
-
       gap: 10px;
-
     }
-
     .btn {
-
       width: 60px;
-
       height: 60px;
-
       background: #444;
-
       color: white;
-
       border: none;
-
       border-radius: 8px;
-
       font-size: 24px;
-
       text-align: center;
-
       line-height: 60px;
-
       cursor: pointer;
-
     }
-
     .btn:active {
-
       background: #666;
-
     }
-
     .btn.hidden {
-
       visibility: hidden;
-
     }
-
   </style>
-
 </head>
-
 <body>
-
-  <canvas id="game" width="400" height="400"></canvas>
-
- 
-
-  <!-- Кнопки управления -->
-
+  <canvas id="game" width="800" height="800"></canvas> <!-- Увеличили размеры холста -->
   <div class="controls">
-
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-
+    <button class="btn hidden"></button>
     <button class="btn" id="up">▲</button>
-
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-
+    <button class="btn hidden"></button>
     <button class="btn" id="left">◀</button>
-
     <button class="btn hidden"></button>
-
     <button class="btn" id="right">▶</button>
-
     <button class="btn hidden"></button>
-
     <button class="btn" id="down">▼</button>
-
     <button class="btn hidden"></button>
-
   </div>
-
   <script>
-
     const canvas = document.getElementById("game");
-
     const ctx = canvas.getContext("2d");
 
-    const grid = 20;
-
-    let snake = [{ x: 160, y: 160 }];
-
+    const grid = 40; // Увеличили размер сетки
+    let snake = [{ x: 4 * grid, y: 4 * grid }]; // Начальная позиция змейки
     let direction = { x: grid, y: 0 };
-
-    let apple = { x: 320, y: 320 };
-
+    let apple = { x: 8 * grid, y: 8 * grid };
     let score = 0;
 
+    // Загружаем изображения для головы и тела
+    const headImg = new Image();
+    headImg.src = "head.png";
+    const bodyImg = new Image();
+    bodyImg.src = "body.png";
+
     function update() {
-
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
       snake.unshift(head);
 
       if (head.x === apple.x && head.y === apple.y) {
-
         apple.x = Math.floor((Math.random() * canvas.width) / grid) * grid;
-
         apple.y = Math.floor((Math.random() * canvas.height) / grid) * grid;
-
         score++;
-
       } else {
-
         snake.pop();
-
       }
 
-      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snake.slice(1).some(part => part.x === head.x && part.y === head.y)) {
-
+      if (
+        head.x < 0 || head.x >= canvas.width || 
+        head.y < 0 || head.y >= canvas.height || 
+        snake.slice(1).some(part => part.x === head.x && part.y === head.y)
+      ) {
         alert(`Game Over! Score: ${score}`);
-
-        snake = [{ x: 160, y: 160 }];
-
+        snake = [{ x: 4 * grid, y: 4 * grid }];
         direction = { x: grid, y: 0 };
-
         score = 0;
-
       }
-
     }
 
     function draw() {
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Рисуем змейку
       snake.forEach((part, index) => {
-
-        ctx.fillStyle = index === 0 ? "lime" : "green";
-
-        ctx.fillRect(part.x, part.y, grid, grid);
-
+        const img = index === 0 ? headImg : bodyImg;
+        ctx.drawImage(img, part.x, part.y, grid, grid);
       });
 
+      // Рисуем яблоко
       ctx.fillStyle = "red";
-
-      ctx.fillRect(apple.x, apple.y, grid, grid);
-
+      ctx.beginPath();
+      ctx.arc(apple.x + grid / 2, apple.y + grid / 2, grid / 2, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     function loop() {
-
       update();
-
       draw();
-
       setTimeout(loop, 270); // Скорость змейки
-
     }
 
     // Управление с помощью кнопок
-
     document.getElementById("up").addEventListener("click", () => {
-
       if (direction.y === 0) direction = { x: 0, y: -grid };
-
     });
 
     document.getElementById("down").addEventListener("click", () => {
-
       if (direction.y === 0) direction = { x: 0, y: grid };
-
     });
 
     document.getElementById("left").addEventListener("click", () => {
-
       if (direction.x === 0) direction = { x: -grid, y: 0 };
-
     });
 
     document.getElementById("right").addEventListener("click", () => {
-
       if (direction.x === 0) direction = { x: grid, y: 0 };
-
     });
 
     loop();
-
   </script>
-
 </body>
-
 </html>
-
