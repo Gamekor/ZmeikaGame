@@ -12,19 +12,23 @@
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            overflow: hidden;
         }
 
         #game-container {
             display: grid;
-            grid-template-columns: repeat(40, 20px);
-            grid-template-rows: repeat(40, 20px);
+            grid-template-columns: repeat(40, 15px); /* Уменьшены размеры клеток */
+            grid-template-rows: repeat(40, 15px);
             gap: 1px;
             background-color: #000;
+            overflow: auto;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .cell {
-            width: 20px;
-            height: 20px;
+            width: 15px;
+            height: 15px;
             background-color: #fff;
         }
 
