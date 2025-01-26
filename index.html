@@ -1,228 +1,155 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Змейка</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
 
-  <meta charset="UTF-8">
+        canvas {
+            border: 2px solid #000;
+            background-color: #fff;
+        }
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        .controls {
+            margin-top: 10px;
+        }
 
-  <title>Змейка</title>
+        .controls button {
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
 
-  <style>
-
-    body {
-
-      display: flex;
-
-      flex-direction: column;
-
-      align-items: center;
-
-      justify-content: center;
-
-      height: 100vh;
-
-      margin: 0;
-
-      background: #000;
-
-      color: white;
-
-    }
-
-    canvas { background: #111; display: block; margin-bottom: 20px; }
-
-    .controls {
-
-      display: grid;
-
-      grid-template-columns: 1fr 1fr 1fr;
-
-      gap: 10px;
-
-    }
-
-    .btn {
-
-      width: 60px;
-
-      height: 60px;
-
-      background: #444;
-
-      color: white;
-
-      border: none;
-
-      border-radius: 8px;
-
-      font-size: 24px;
-
-      text-align: center;
-
-      line-height: 60px;
-
-      cursor: pointer;
-
-    }
-
-    .btn:active {
-
-      background: #666;
-
-    }
-
-    .btn.hidden {
-
-      visibility: hidden;
-
-    }
-
-  </style>
-
+        .controls button:active {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
-
 <body>
-
-  <canvas id="game" width="400" height="400"></canvas>
-
- 
-
-  <!-- Кнопки управления -->
-
-  <div class="controls">
-
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-
-    <button class="btn" id="up">▲</button>
-
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-
-    <button class="btn" id="left">◀</button>
-
-    <button class="btn hidden"></button>
-
-    <button class="btn" id="right">▶</button>
-
-    <button class="btn hidden"></button>
-
-    <button class="btn" id="down">▼</button>
-
-    <button class="btn hidden"></button>
-
-  </div>
-
-  <script>
-
-    const canvas = document.getElementById("game");
-
-    const ctx = canvas.getContext("2d");
-
-    const grid = 20;
-
-    let snake = [{ x: 160, y: 160 }];
-
-    let direction = { x: grid, y: 0 };
-
-    let apple = { x: 320, y: 320 };
-
-    let score = 0;
-
-    function update() {
-
-      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-      snake.unshift(head);
-
-      if (head.x === apple.x && head.y === apple.y) {
-
-        apple.x = Math.floor((Math.random() * canvas.width) / grid) * grid;
-
-        apple.y = Math.floor((Math.random() * canvas.height) / grid) * grid;
-
-        score++;
-
-      } else {
-
-        snake.pop();
-
-      }
-
-      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snake.slice(1).some(part => part.x === head.x && part.y === head.y)) {
-
-        alert(`Game Over! Score: ${score}`);
-
-        snake = [{ x: 160, y: 160 }];
-
-        direction = { x: grid, y: 0 };
-
-        score = 0;
-
-      }
-
-    }
-
-    function draw() {
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      snake.forEach((part, index) => {
-
-        ctx.fillStyle = index === 0 ? "lime" : "green";
-
-        ctx.fillRect(part.x, part.y, grid, grid);
-
-      });
-
-      ctx.fillStyle = "red";
-
-      ctx.fillRect(apple.x, apple.y, grid, grid);
-
-    }
-
-    function loop() {
-
-      update();
-
-      draw();
-
-      setTimeout(loop, 270); // Скорость змейки
-
-    }
-
-    // Управление с помощью кнопок
-
-    document.getElementById("up").addEventListener("click", () => {
-
-      if (direction.y === 0) direction = { x: 0, y: -grid };
-
-    });
-
-    document.getElementById("down").addEventListener("click", () => {
-
-      if (direction.y === 0) direction = { x: 0, y: grid };
-
-    });
-
-    document.getElementById("left").addEventListener("click", () => {
-
-      if (direction.x === 0) direction = { x: -grid, y: 0 };
-
-    });
-
-    document.getElementById("right").addEventListener("click", () => {
-
-      if (direction.x === 0) direction = { x: grid, y: 0 };
-
-    });
-
-    loop();
-
-  </script>
-
+    <h1>Змейка</h1>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <div class="controls">
+        <button id="up">⬆️</button>
+        <div>
+            <button id="left">⬅️</button>
+            <button id="right">➡️</button>
+        </div>
+        <button id="down">⬇️</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const canvasSize = canvas.width;
+        const totalCells = (canvasSize / gridSize) ** 2;
+
+        const snake = [{ x: 2, y: 2 }];
+        let direction = { x: 1, y: 0 };
+        let food = spawnFood();
+        let gameRunning = true;
+
+        const headImage = new Image();
+        headImage.src = 'head.png';
+
+        function drawSnake() {
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    ctx.drawImage(headImage, segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                } else {
+                    ctx.fillStyle = 'green';
+                    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                }
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function spawnFood() {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * (canvasSize / gridSize));
+                y = Math.floor(Math.random() * (canvasSize / gridSize));
+            } while (snake.some(segment => segment.x === x && segment.y === y));
+            return { x, y };
+        }
+
+        function updateSnake() {
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            // Проверка на столкновение со стенами или с самим собой
+            if (
+                head.x < 0 || head.y < 0 ||
+                head.x >= canvasSize / gridSize || head.y >= canvasSize / gridSize ||
+                snake.some(segment => segment.x === head.x && segment.y === head.y)
+            ) {
+                alert('Игра окончена! Попробуйте снова.');
+                gameRunning = false;
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Проверка на еду
+            if (head.x === food.x && head.y === food.y) {
+                food = spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            // Проверка на победу
+            if (snake.length === totalCells) {
+                alert('Поздравляем, вы победили!');
+                gameRunning = false;
+            }
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateSnake();
+            drawSnake();
+            drawFood();
+
+            setTimeout(gameLoop, 270);
+        }
+
+        function changeDirection(x, y) {
+            if ((x === -direction.x && y === -direction.y) || (x === direction.x && y === direction.y)) {
+                return; // Игнорируем обратное направление
+            }
+            direction = { x, y };
+        }
+
+        // Управление кнопками
+        document.getElementById('up').addEventListener('click', () => changeDirection(0, -1));
+        document.getElementById('down').addEventListener('click', () => changeDirection(0, 1));
+        document.getElementById('left').addEventListener('click', () => changeDirection(-1, 0));
+        document.getElementById('right').addEventListener('click', () => changeDirection(1, 0));
+
+        // Запуск игры
+        gameLoop();
+    </script>
 </body>
-
 </html>
-
