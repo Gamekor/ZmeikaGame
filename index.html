@@ -19,18 +19,18 @@
     .controls {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
+      gap: 10px;
     }
     .btn {
-      width: 100px;
-      height: 100px;
+      width: 60px;
+      height: 60px;
       background: #444;
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 36px;
+      border-radius: 8px;
+      font-size: 24px;
       text-align: center;
-      line-height: 100px;
+      line-height: 60px;
       cursor: pointer;
     }
     .btn:active {
@@ -42,7 +42,7 @@
   </style>
 </head>
 <body>
-  <canvas id="game" width="800" height="800"></canvas>
+  <canvas id="game" width="400" height="400"></canvas>
   <div class="controls">
     <button class="btn hidden"></button> <!-- Пустая кнопка -->
     <button class="btn" id="up">▲</button>
@@ -57,11 +57,10 @@
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
-
-    const grid = 40; // Увеличили размер клетки
-    let snake = [{ x: 320, y: 320 }];
+    const grid = 20;
+    let snake = [{ x: 160, y: 160 }];
     let direction = { x: grid, y: 0 };
-    let apple = { x: 640, y: 640 };
+    let apple = { x: 320, y: 320 };
     let score = 0;
 
     // Загружаем изображения для головы и тела
@@ -88,7 +87,7 @@
         snake.slice(1).some(part => part.x === head.x && part.y === head.y)
       ) {
         alert(`Game Over! Score: ${score}`);
-        snake = [{ x: 320, y: 320 }];
+        snake = [{ x: 160, y: 160 }];
         direction = { x: grid, y: 0 };
         score = 0;
       }
