@@ -19,18 +19,18 @@
     .controls {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+      gap: 20px;
     }
     .btn {
-      width: 60px;
-      height: 60px;
+      width: 100px;
+      height: 100px;
       background: #444;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 24px;
+      border-radius: 10px;
+      font-size: 36px;
       text-align: center;
-      line-height: 60px;
+      line-height: 100px;
       cursor: pointer;
     }
     .btn:active {
@@ -42,11 +42,11 @@
   </style>
 </head>
 <body>
-  <canvas id="game" width="800" height="800"></canvas> <!-- Увеличили размеры холста -->
+  <canvas id="game" width="800" height="800"></canvas>
   <div class="controls">
-    <button class="btn hidden"></button>
+    <button class="btn hidden"></button> <!-- Пустая кнопка -->
     <button class="btn" id="up">▲</button>
-    <button class="btn hidden"></button>
+    <button class="btn hidden"></button> <!-- Пустая кнопка -->
     <button class="btn" id="left">◀</button>
     <button class="btn hidden"></button>
     <button class="btn" id="right">▶</button>
@@ -58,10 +58,10 @@
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
 
-    const grid = 40; // Увеличили размер сетки
-    let snake = [{ x: 4 * grid, y: 4 * grid }]; // Начальная позиция змейки
+    const grid = 40; // Увеличили размер клетки
+    let snake = [{ x: 320, y: 320 }];
     let direction = { x: grid, y: 0 };
-    let apple = { x: 8 * grid, y: 8 * grid };
+    let apple = { x: 640, y: 640 };
     let score = 0;
 
     // Загружаем изображения для головы и тела
@@ -88,7 +88,7 @@
         snake.slice(1).some(part => part.x === head.x && part.y === head.y)
       ) {
         alert(`Game Over! Score: ${score}`);
-        snake = [{ x: 4 * grid, y: 4 * grid }];
+        snake = [{ x: 320, y: 320 }];
         direction = { x: grid, y: 0 };
         score = 0;
       }
@@ -105,9 +105,7 @@
 
       // Рисуем яблоко
       ctx.fillStyle = "red";
-      ctx.beginPath();
-      ctx.arc(apple.x + grid / 2, apple.y + grid / 2, grid / 2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(apple.x, apple.y, grid, grid);
     }
 
     function loop() {
