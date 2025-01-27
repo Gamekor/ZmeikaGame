@@ -5,55 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Змейка</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #000;
-      color: white;
-    }
-    canvas { background: #111; display: block; margin-bottom: 20px; }
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-    .btn {
-      width: 60px;
-      height: 60px;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 24px;
-      text-align: center;
-      line-height: 60px;
-      cursor: pointer;
-    }
-    .btn:active {
-      background: #666;
-    }
-    .btn.hidden {
-      visibility: hidden;
-    }
+    body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #000; }
+    canvas { background: #111; display: block; }
   </style>
 </head>
 <body>
   <canvas id="game" width="400" height="400"></canvas>
-  <div class="controls">
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-    <button class="btn" id="up">▲</button>
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-    <button class="btn" id="left">◀</button>
-    <button class="btn hidden"></button>
-    <button class="btn" id="right">▶</button>
-    <button class="btn hidden"></button>
-    <button class="btn" id="down">▼</button>
-    <button class="btn hidden"></button>
-  </div>
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
@@ -63,11 +20,8 @@
     let apple = { x: 320, y: 320 };
     let score = 0;
 
-    // Загружаем изображения для головы и тела
-    const headImg = new Image();
-    headImg.src = "head.png";
-    const bodyImg = new Image();
-    bodyImg.src = "body.png";
+    // Для свайпов
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
 
     function update() {
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
@@ -81,11 +35,7 @@
         snake.pop();
       }
 
-      if (
-        head.x < 0 || head.x >= canvas.width || 
-        head.y < 0 || head.y >= canvas.height || 
-        snake.slice(1).some(part => part.x === head.x && part.y === head.y)
-      ) {
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || snake.slice(1).some(part => part.x === head.x && part.y === head.y)) {
         alert(`Game Over! Score: ${score}`);
         snake = [{ x: 160, y: 160 }];
         direction = { x: grid, y: 0 };
@@ -96,13 +46,11 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Рисуем змейку
       snake.forEach((part, index) => {
-        const img = index === 0 ? headImg : bodyImg;
-        ctx.drawImage(img, part.x, part.y, grid, grid);
+        ctx.fillStyle = index === 0 ? "lime" : "green";
+        ctx.fillRect(part.x, part.y, grid, grid);
       });
 
-      // Рисуем яблоко
       ctx.fillStyle = "red";
       ctx.fillRect(apple.x, apple.y, grid, grid);
     }
@@ -110,24 +58,41 @@
     function loop() {
       update();
       draw();
-      setTimeout(loop, 270); // Скорость змейки
+      setTimeout(loop, 150); // Скорость змейки
     }
 
-    // Управление с помощью кнопок
-    document.getElementById("up").addEventListener("click", () => {
-      if (direction.y === 0) direction = { x: 0, y: -grid };
+    // Управление стрелками
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp" && direction.y === 0) direction = { x: 0, y: -grid };
+      if (e.key === "ArrowDown" && direction.y === 0) direction = { x: 0, y: grid };
+      if (e.key === "ArrowLeft" && direction.x === 0) direction = { x: -grid, y: 0 };
+      if (e.key === "ArrowRight" && direction.x === 0) direction = { x: grid, y: 0 };
     });
 
-    document.getElementById("down").addEventListener("click", () => {
-      if (direction.y === 0) direction = { x: 0, y: grid };
+    // Управление свайпами
+    canvas.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
     });
 
-    document.getElementById("left").addEventListener("click", () => {
-      if (direction.x === 0) direction = { x: -grid, y: 0 };
-    });
+    canvas.addEventListener("touchend", (e) => {
+      const touch = e.changedTouches[0];
+      touchEndX = touch.clientX;
+      touchEndY = touch.clientY;
 
-    document.getElementById("right").addEventListener("click", () => {
-      if (direction.x === 0) direction = { x: grid, y: 0 };
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Горизонтальное движение
+        if (diffX > 0 && direction.x === 0) direction = { x: grid, y: 0 }; // Свайп вправо
+        else if (diffX < 0 && direction.x === 0) direction = { x: -grid, y: 0 }; // Свайп влево
+      } else {
+        // Вертикальное движение
+        if (diffY > 0 && direction.y === 0) direction = { x: 0, y: grid }; // Свайп вниз
+        else if (diffY < 0 && direction.y === 0) direction = { x: 0, y: -grid }; // Свайп вверх
+      }
     });
 
     loop();
