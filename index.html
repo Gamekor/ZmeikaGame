@@ -1,137 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Змейка</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #000;
-      color: white;
-    }
-    canvas { background: #111; display: block; margin-bottom: 20px; }
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 20px;
-    }
-    .btn {
-      width: 100px;
-      height: 100px;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 36px;
-      text-align: center;
-      line-height: 100px;
-      cursor: pointer;
-    }
-    .btn:active {
-      background: #666;
-    }
-    .btn.hidden {
-      visibility: hidden;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Змейка</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            background-color: #000;
+            display: block;
+            margin: 20px auto;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .controls button {
+            padding: 15px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <canvas id="game" width="800" height="800"></canvas>
-  <div class="controls">
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-    <button class="btn" id="up">▲</button>
-    <button class="btn hidden"></button> <!-- Пустая кнопка -->
-    <button class="btn" id="left">◀</button>
-    <button class="btn hidden"></button>
-    <button class="btn" id="right">▶</button>
-    <button class="btn hidden"></button>
-    <button class="btn" id="down">▼</button>
-    <button class="btn hidden"></button>
-  </div>
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+    <h1>Змейка</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="controls">
+        <button id="up">↑</button>
+        <button id="left">←</button>
+        <button id="down">↓</button>
+        <button id="right">→</button>
+    </div>
+    <audio id="loseSound" src="stoni.mp3" loop></audio>
 
-    const grid = 40; // Увеличили размер клетки
-    let snake = [{ x: 320, y: 320 }];
-    let direction = { x: grid, y: 0 };
-    let apple = { x: 640, y: 640 };
-    let score = 0;
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const tileSize = 20;
+        const tileCount = canvas.width / tileSize;
 
-    // Загружаем изображения для головы и тела
-    const headImg = new Image();
-    headImg.src = "head.png";
-    const bodyImg = new Image();
-    bodyImg.src = "body.png";
+        let snake = [{ x: 10, y: 10 }]; // Начальная позиция змейки
+        let food = { x: 5, y: 5 }; // Начальная позиция еды
+        let direction = { x: 1, y: 0 }; // Начальное направление (вправо)
+        let gameOver = false;
+        const loseSound = document.getElementById('loseSound');
 
-    function update() {
-      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-      snake.unshift(head);
+        function gameLoop() {
+            if (gameOver) {
+                loseSound.play();
+                return;
+            }
 
-      if (head.x === apple.x && head.y === apple.y) {
-        apple.x = Math.floor((Math.random() * canvas.width) / grid) * grid;
-        apple.y = Math.floor((Math.random() * canvas.height) / grid) * grid;
-        score++;
-      } else {
-        snake.pop();
-      }
+            update();
+            draw();
+            setTimeout(gameLoop, 100);
+        }
 
-      if (
-        head.x < 0 || head.x >= canvas.width || 
-        head.y < 0 || head.y >= canvas.height || 
-        snake.slice(1).some(part => part.x === head.x && part.y === head.y)
-      ) {
-        alert(`Game Over! Score: ${score}`);
-        snake = [{ x: 320, y: 320 }];
-        direction = { x: grid, y: 0 };
-        score = 0;
-      }
-    }
+        function update() {
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Проверка на столкновение с границами или с собой
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver = true;
+                return;
+            }
 
-      // Рисуем змейку
-      snake.forEach((part, index) => {
-        const img = index === 0 ? headImg : bodyImg;
-        ctx.drawImage(img, part.x, part.y, grid, grid);
-      });
+            snake.unshift(head); // Добавляем новую голову змейки
 
-      // Рисуем яблоко
-      ctx.fillStyle = "red";
-      ctx.fillRect(apple.x, apple.y, grid, grid);
-    }
+            // Проверка, съела ли змейка еду
+            if (head.x === food.x && head.y === food.y) {
+                food = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
+            } else {
+                snake.pop(); // Удаляем хвост, если еда не съедена
+            }
+        }
 
-    function loop() {
-      update();
-      draw();
-      setTimeout(loop, 270); // Скорость змейки
-    }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Управление с помощью кнопок
-    document.getElementById("up").addEventListener("click", () => {
-      if (direction.y === 0) direction = { x: 0, y: -grid };
-    });
+            // Рисуем змейку
+            ctx.fillStyle = 'lime';
+            snake.forEach(segment => ctx.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize));
 
-    document.getElementById("down").addEventListener("click", () => {
-      if (direction.y === 0) direction = { x: 0, y: grid };
-    });
+            // Рисуем еду
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize, tileSize);
 
-    document.getElementById("left").addEventListener("click", () => {
-      if (direction.x === 0) direction = { x: -grid, y: 0 };
-    });
+            // Рисуем "Game Over", если игра окончена
+            if (gameOver) {
+                ctx.fillStyle = 'white';
+                ctx.font = '30px Arial';
+                ctx.fillText('Game Over!', canvas.width / 2 - 80, canvas.height / 2);
+            }
+        }
 
-    document.getElementById("right").addEventListener("click", () => {
-      if (direction.x === 0) direction = { x: grid, y: 0 };
-    });
+        // Управление кнопками
+        document.getElementById('up').addEventListener('click', () => {
+            if (direction.y === 0) direction = { x: 0, y: -1 }; // Вверх
+        });
+        document.getElementById('left').addEventListener('click', () => {
+            if (direction.x === 0) direction = { x: -1, y: 0 }; // Влево
+        });
+        document.getElementById('down').addEventListener('click', () => {
+            if (direction.y === 0) direction = { x: 0, y: 1 }; // Вниз
+        });
+        document.getElementById('right').addEventListener('click', () => {
+            if (direction.x === 0) direction = { x: 1, y: 0 }; // Вправо
+        });
 
-    loop();
-  </script>
+        gameLoop(); // Запуск игры
+    </script>
 </body>
 </html>
